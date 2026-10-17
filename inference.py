@@ -41,21 +41,25 @@ def main():
 
             # 遍历每个装甲板目标
             for idx, box in enumerate(boxes):
-                # 类别id + 类别名称
+                # 提取类别、置信度、检测框坐标
                 cls_id = int(box.cls)
                 cls_name = model.names[cls_id]
+                conf = float(box.conf[0])  # 从模型输出提取置信度
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
 
-                # 绘制检测框 + 类别文字
-                cv2.rectangle(frame, (x1,y1), (x2,y2), (0,255,0), 2)
-                cv2.putText(frame, cls_name, (x1,y1-5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
+                # 绘制检测框
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-                # 获取4个关键点坐标
+                # 绘制 类别名称 + 置信度 标签（保留两位小数）
+                label = f"{cls_name} {conf:.2f}"
+                cv2.putText(frame, label, (x1, y1 - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+                # 绘制4个关键点
                 kpts = keypoints.xy[idx].cpu().numpy()
                 for (kx, ky) in kpts:
                     kx, ky = int(kx), int(ky)
-                    cv2.circle(frame, (kx, ky), 4, (0,0,255), -1)
+                    cv2.circle(frame, (kx, ky), 4, (0, 0, 255), -1)
 
         out.write(frame)
 
